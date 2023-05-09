@@ -1,16 +1,53 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.TreeView?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<?import javafx.scene.control.Button?>
-<VBox alignment="CENTER" spacing="20.0" xmlns:fx="http://javafx.com/fxml"
-      fx:controller="ieu.edu.tr.iae.controllers.AppController">
-    <padding>
-        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0"/>
-    </padding>
-
-    <Label fx:id="welcomeText"/>
-    <Button text="Hello!" onAction="#onHelloButtonClick"/>
+<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="484.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ieu.edu.tr.iae.controllers.AppController">
+   <children>
+      <HBox prefHeight="33.0" prefWidth="600.0">
+         <children>
+            <MenuBar prefHeight="26.0" prefWidth="601.0">
+               <menus>
+                  <Menu mnemonicParsing="false" text="Help">
+                     <items>
+                        <MenuItem fx:id="menuItemHelp" mnemonicParsing="false" text="Help" />
+                     </items>
+                  </Menu>
+               </menus>
+            </MenuBar>
+         </children>
+      </HBox>
+      <HBox prefHeight="459.0" prefWidth="600.0">
+         <children>
+            <VBox prefHeight="455.0" prefWidth="387.0">
+               <children>
+                  <TreeView fx:id="treeView" prefHeight="381.0" prefWidth="357.0">
+                     <VBox.margin>
+                        <Insets bottom="15.0" left="15.0" right="15.0" top="50.0" />
+                     </VBox.margin>
+                  </TreeView>
+               </children>
+            </VBox>
+            <VBox prefHeight="455.0" prefWidth="213.0" spacing="20.0">
+               <children>
+                  <Button fx:id="configButton" mnemonicParsing="false" prefWidth="70.0" text="Config" />
+                  <Button fx:id="runButton" mnemonicParsing="false" prefWidth="70.0" text="Run" />
+               </children>
+               <padding>
+                  <Insets left="100.0" top="300.0" />
+               </padding>
+               <HBox.margin>
+                  <Insets />
+               </HBox.margin>
+            </VBox>
+         </children>
+      </HBox>
+   </children>
 </VBox>
