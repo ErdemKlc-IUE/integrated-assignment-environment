@@ -1,9 +1,23 @@
 package ieu.edu.tr.iae.controllers;
 
+import ieu.edu.tr.iae.*;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.input.MouseButton;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.stage.DirectoryChooser;
+import org.sqlite.SQLiteException;
+
+import java.io.File;
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.Optional;
 
 
 public class AppController {
@@ -17,12 +31,77 @@ public class AppController {
     private MenuItem menuItemHelp;
 
     @FXML
-    private TreeView<?> treeView;
+    private TreeView<Submission> treeView;
+
+    private TreeItem<Submission> root;
+
+    Configuration conf = null;
+
+    ComboBox<String> config = new ComboBox<>();
+    TextField compilerPath=  new TextField();
+    TextField args=  new TextField();
+    TextField expectedOutput=  new TextField();
+    TextField assignmentPath=  new TextField();
+    TextField name=  new TextField();
+    File selectedDirectory = null;
+
     @FXML
-    private void initialize(){
+    private void initialize() throws SQLException, ClassNotFoundException {
         System.out.println("-************************************");
+        Database database = Database.getInstance();
+        database.open();
+
+        ObservableList<String> configList = FXCollections.observableArrayList();
+        configList.addAll("JavaConfig","PythonConfig","CConfig","OptionalConfig");
+
+        root = new TreeItem<Submission>(new Submission("Submissions","-1","-1"));
+        root.setExpanded(true);
+
+        treeView.setRoot(new TreeItem<>());
+        treeView.getRoot().setExpanded(true);
+        treeView.getRoot().getChildren().add(root);
 
 
+        treeView.setCellFactory(value -> new TreeCell<>() {
+            @Override
+            protected void updateItem(final Submission submission, final boolean empty) {
+                super.updateItem(submission, empty);
+                if (submission == null || empty) {
+                    setText(null);
+                } else {
+                    setText(submission.getId());
+                }
+            }
+        });
+
+
+
+
+        treeView.setOnMouseClicked(event -> {
+            if (event.getButton().equals(MouseButton.PRIMARY)) {
+
+                Dialog<Configuration> d = new Dialog<>();
+                DialogPane pane = new DialogPane();
+                pane.setMaxHeight(700);
+                pane.setMaxWidth(400);
+                pane.getStylesheets().add("style.css");
+                pane.getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+                d.setDialogPane(pane);
+                VBox box = new VBox();
+                box.setSpacing(3);
+                if (treeView.getSelectionModel().getSelectedItem() == null) {
+                    return;
+                }
+                Submission submission = treeView.getSelectionModel().getSelectedItem().getValue();
+                if (root.getValue().equals(submission) || treeView.getSelectionModel().getSelectedItem().getValue() == null) {
+                    return;
+                }
+
+
+            }
+
+
+        });
 
         menuItemHelp.setOnAction((value) -> {
             Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
@@ -37,6 +116,213 @@ public class AppController {
             alert.getDialogPane().setExpandableContent(area);
             alert.showAndWait();
         });
-    }
 
+        runButton.setOnAction(actionEvent -> {
+            try {
+                // Extract zip files in the selected directory
+                ZipExtractor zipExtractor = new ZipExtractor();
+                zipExtractor.extract(String.valueOf(selectedDirectory), "./extractedFiles/");
+
+                // Compile and get results for each extracted file
+                File[] files = selectedDirectory.listFiles();
+                if (files != null) {
+                    for (File file : files) {
+                        if (file.isFile() && file.getName().toLowerCase().endsWith(".java")) {
+                            // Compile the Java file
+                            JavaCompiler javaCompiler = new JavaCompiler(selectedDirectory);
+                            Output output = javaCompiler.compile(file.getAbsolutePath(), "");
+
+                            // Process the compilation result
+                            if (output.getExitCode() == 0) {
+                                // Compilation successful
+                                System.out.println("File: " + file.getName() + " compiled successfully");
+
+                                // Add a TreeItem to the TreeView
+                                Submission sub = new Submission(file.getName(), output.getOutput(), conf.expectedOutput);
+                                TreeItem<Submission> newItem = new TreeItem<>(sub);
+
+                                treeView.getRoot().getChildren().add(newItem);
+
+                            } else {
+                                // Compilation failed
+                                System.out.println("File: " + file.getName() + " compilation failed");
+                                System.out.println("Output: " + output.getOutput());
+                                System.out.println("Error: " + output.getError());
+                            }
+                        }
+                    }
+                }
+
+                // Show a success message
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setTitle("Extraction and Compilation");
+                alert.setHeaderText("Extraction and Compilation Complete");
+                alert.setContentText("Extraction and compilation of zip files completed successfully.");
+                alert.showAndWait();
+
+            } catch (IOException e) {
+                e.printStackTrace();
+                // Show an error message
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Error");
+                alert.setHeaderText("Error occurred during extraction and compilation");
+                alert.setContentText(e.getMessage());
+                alert.showAndWait();
+            } catch (Exception e) {
+                e.printStackTrace();
+                // Show an error message
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Error");
+                alert.setHeaderText("Error occurred during compilation");
+                alert.setContentText(e.getMessage());
+                alert.showAndWait();
+            }
+
+                }
+            );
+
+
+
+
+        configButton.setOnAction((value) -> {
+            DialogPane pane = new DialogPane();
+            pane.getStylesheets().add("style.css");
+
+
+            config.setPromptText("Config");
+
+
+            config.setItems(configList);
+            config.valueProperty().addListener(new ChangeListener<String>() {
+                @Override
+                public void changed(ObservableValue<? extends String> observableValue, String s, String t1) {
+                    String selectedComboBoxValue = config.getValue();
+                    String directoryString = selectedComboBoxValue.toString();
+                    if (selectedComboBoxValue == null) {
+                    } else if (selectedComboBoxValue.equals("CConfig")) {
+                        Configuration.getInstance().name = "C";
+                        compilerPath.setText("gcc");
+                        args.setText("main.c");
+
+
+                    } else if (selectedComboBoxValue.equals("PythonConfig")) {
+                        Configuration.getInstance().name = "Python";
+                        compilerPath.setText("python3");
+                        args.setText("main.py");
+
+
+                    } else if (selectedComboBoxValue.equals("JavaConfig")) {
+                        Configuration.getInstance().name = "Java";
+                        compilerPath.setText("javac");
+                        args.setText("main.java");
+
+
+                    }
+
+                }
+                                               });
+
+
+            name.setPromptText("name");
+
+
+            compilerPath.setPromptText("compiler path");
+
+
+            args.setPromptText("args");
+
+
+            expectedOutput.setPromptText("expected output");
+
+
+
+            Button browseButton = new Button("Browse");
+            browseButton.setOnAction(event -> {
+                DirectoryChooser directoryChooser = new DirectoryChooser();
+                selectedDirectory = directoryChooser.showDialog(pane.getScene().getWindow());
+                if (selectedDirectory != null) {
+                    assignmentPath.setText(selectedDirectory.getPath());
+                }
+            });
+
+
+            assignmentPath.setPromptText("assignment path");
+            assignmentPath.setEditable(false);
+
+            HBox assignmentPathBox = new HBox();
+            assignmentPathBox.getChildren().addAll(assignmentPath, browseButton);
+
+            pane.setMaxHeight(700);
+            pane.setMaxWidth(400);
+            VBox box = new VBox();
+            box.setSpacing(3);
+            box.getChildren().addAll(
+                    config,
+                    name,
+                    assignmentPathBox,
+                    compilerPath,
+                    args,
+                    expectedOutput
+            );
+            pane.setContent(box);
+            pane.getButtonTypes().addAll(ButtonType.OK, ButtonType.CLOSE);
+            Dialog<Configuration> dialog = new Dialog<>();
+            dialog.setTitle("add");
+            dialog.setDialogPane(pane);
+
+            dialog.setResultConverter(type -> {
+                if (type == ButtonType.OK) {
+                    saveConfig(assignmentPath.getText());
+                }
+                return null;
+            });
+
+            Optional<Configuration> optional = dialog.showAndWait();
+            if (optional.isPresent()) {
+                Configuration config = optional.get();
+                // Process the configuration
+            }
+
+        });
+
+
+
+    }
+    public void saveConfig(String selectedDirectory){
+        try {
+            if (!selectedDirectory.isEmpty()) {
+                Database.getInstance().open();
+                Database.getInstance().addConfig(compilerPath.getText(), args.getText(),name.getText(), expectedOutput.getText());
+
+                Database.getInstance().disconnect();
+
+                conf = Configuration.getInstance();
+                conf.name = name.getText();
+                conf.compilerPath = compilerPath.getText();
+                conf.expectedOutput = expectedOutput.getText();
+                conf.args = args.getText();
+                conf.assignmentPath = assignmentPath.getText();
+
+
+                Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+                alert.setTitle("Condig save");
+                alert.setHeaderText("Config save");
+                alert.setContentText("Configuration saved.");
+                alert.showAndWait();
+
+                name.setText("");
+                args.setText("");
+                expectedOutput.setText("");
+                assignmentPath.setText("");
+                compilerPath.setText("");
+
+                System.out.println("Added");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
