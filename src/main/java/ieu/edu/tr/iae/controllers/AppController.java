@@ -117,6 +117,8 @@ public class AppController {
             alert.showAndWait();
         });
 
+
+
         runButton.setOnAction(actionEvent -> {
             try {
                 // Extract zip files in the selected directory
@@ -128,26 +130,76 @@ public class AppController {
                 if (files != null) {
                     for (File file : files) {
                         if (file.isFile() && file.getName().toLowerCase().endsWith(".java")) {
-                            // Compile the Java file
-                            JavaCompiler javaCompiler = new JavaCompiler(selectedDirectory);
-                            Output output = javaCompiler.compile(file.getAbsolutePath(), "");
+                            if (conf.name.equals("Java")) {
+                                // Compile the Java file
+                                JavaCompiler javaCompiler = new JavaCompiler(selectedDirectory);
+                                Output output = javaCompiler.compile(file.getAbsolutePath(), "");
 
-                            // Process the compilation result
-                            if (output.getExitCode() == 0) {
-                                // Compilation successful
-                                System.out.println("File: " + file.getName() + " compiled successfully");
+                                // Process the compilation result
+                                if (output.getExitCode() == 0) {
+                                    // Compilation successful
+                                    System.out.println("File: " + file.getName() + " compiled successfully");
 
-                                // Add a TreeItem to the TreeView
-                                Submission sub = new Submission(file.getName(), output.getOutput(), conf.expectedOutput);
-                                TreeItem<Submission> newItem = new TreeItem<>(sub);
+                                    // Add a TreeItem to the TreeView
+                                    Submission sub = new Submission(file.getName(), output.getOutput(), conf.expectedOutput);
+                                    TreeItem<Submission> newItem = new TreeItem<>(sub);
 
-                                treeView.getRoot().getChildren().add(newItem);
+                                    treeView.getRoot().getChildren().add(newItem);
 
-                            } else {
-                                // Compilation failed
-                                System.out.println("File: " + file.getName() + " compilation failed");
-                                System.out.println("Output: " + output.getOutput());
-                                System.out.println("Error: " + output.getError());
+                                } else {
+                                    // Compilation failed
+                                    System.out.println("File: " + file.getName() + " compilation failed");
+                                    System.out.println("Output: " + output.getOutput());
+                                    System.out.println("Error: " + output.getError());
+                                }
+                            }
+                        } else if (file.isFile() && file.getName().toLowerCase().endsWith(".py")) {
+                            if (conf.name.equals("Python")) {
+                                // Compile the Python file
+                                PythonInterpreter pythonCompiler = new PythonInterpreter(selectedDirectory);
+                                Output output = pythonCompiler.compile(file.getAbsolutePath(), "");
+
+                                // Process the compilation result
+                                if (output.getExitCode() == 0) {
+                                    // Compilation successful
+                                    System.out.println("File: " + file.getName() + " compiled successfully");
+
+                                    // Add a TreeItem to the TreeView
+                                    Submission sub = new Submission(file.getName(), output.getOutput(), conf.expectedOutput);
+                                    TreeItem<Submission> newItem = new TreeItem<>(sub);
+
+                                    treeView.getRoot().getChildren().add(newItem);
+
+                                } else {
+                                    // Compilation failed
+                                    System.out.println("File: " + file.getName() + " compilation failed");
+                                    System.out.println("Output: " + output.getOutput());
+                                    System.out.println("Error: " + output.getError());
+                                }
+                            }
+                        }
+                        else if (file.isFile() && file.getName().toLowerCase().endsWith(".c")) {
+                            if (conf.name.equals("C")) {
+                                // Compile the C file
+                                CCompiler cCompiler = new CCompiler(selectedDirectory);
+                                Output output = cCompiler.compile(file.getAbsolutePath(), "");
+
+                                // Process the compilation result
+                                if (output.getExitCode() == 0) {
+                                    // Compilation successful
+                                    System.out.println("File: " + file.getName() + " compiled successfully");
+
+                                    // Add a TreeItem to the TreeView
+                                    Submission sub = new Submission(file.getName(), output.getOutput(), conf.expectedOutput);
+                                    TreeItem<Submission> newItem = new TreeItem<>(sub);
+
+                                    treeView.getRoot().getChildren().add(newItem);
+                                } else {
+                                    // Compilation failed
+                                    System.out.println("File: " + file.getName() + " compilation failed");
+                                    System.out.println("Output: " + output.getOutput());
+                                    System.out.println("Error: " + output.getError());
+                                }
                             }
                         }
                     }
@@ -177,9 +229,8 @@ public class AppController {
                 alert.setContentText(e.getMessage());
                 alert.showAndWait();
             }
+        });
 
-                }
-            );
 
 
 
