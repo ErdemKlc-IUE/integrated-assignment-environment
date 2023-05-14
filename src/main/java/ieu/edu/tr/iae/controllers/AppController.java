@@ -56,7 +56,7 @@ public class AppController {
         database.open();
 
         ObservableList<String> configList = FXCollections.observableArrayList();
-        configList.addAll("JavaConfig","PythonConfig","CConfig","OptionalConfig");
+        configList.addAll("JavaConfig","PythonConfig","CConfig","CPPConfig","OptionalConfig");
 
         root = new TreeItem<Submission>(new Submission("Submissions","-1","-1"));
         root.setExpanded(true);
@@ -262,6 +262,30 @@ public class AppController {
                                     // Compilation successful
                                     System.out.println("File: " + file.getName() + " compiled successfully");
 
+                                    // Add a TreeItem to the TreeView
+                                    Submission sub = new Submission(file.getName(), output.getOutput(), conf.expectedOutput);
+                                    TreeItem<Submission> newItem = new TreeItem<>(sub);
+
+                                    treeView.getRoot().getChildren().add(newItem);
+                                } else {
+                                    // Compilation failed
+                                    System.out.println("File: " + file.getName() + " compilation failed");
+                                    System.out.println("Output: " + output.getOutput());
+                                    System.out.println("Error: " + output.getError());
+                                }
+                            }
+                        }
+                        else if(file.isFile() && file.getName().toLowerCase().endsWith(".cpp")) {
+                            if (conf.name.equals("CPP")) {
+                                // Compile the C file
+                                CPPCompiler cppCompiler = new CPPCompiler(selectedDirectory);
+                                Output output = cppCompiler.compile(file.getAbsolutePath(), "");
+
+                                // Process the compilation result
+                                if (output.getExitCode() == 0) {
+                                    // Compilation successful
+                                    System.out.println("File: " + file.getName() + " compiled successfully");
+
                                     Submission sub = new Submission(file.getName(), output.getOutput(), conf.expectedOutput);
                                     if(Objects.equals(output.getOutput(), expectedOutput.toString())){
                                         output.setOutput("Correct");
@@ -351,10 +375,16 @@ public class AppController {
                         args.setText("main.java");
 
 
+                    } else if (selectedComboBoxValue.equals("CPPConfig")) {
+                        Configuration.getInstance().name = "CPP";
+                        compilerPath.setText("g++");
+                        args.setText("main.cpp");
+
+
                     }
 
                 }
-                                               });
+            });
 
 
             name.setPromptText("name");
