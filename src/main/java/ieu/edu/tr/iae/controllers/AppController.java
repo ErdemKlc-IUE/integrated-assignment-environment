@@ -133,27 +133,57 @@ public class AppController {
                 File[] files = selectedDirectory.listFiles();
                 if (files != null) {
                     for (File file : files) {
+
+
                         if (file.isFile() && file.getName().toLowerCase().endsWith(".java")) {
                             if (conf.compilerPath.equals("javac")) {
                                 // Compile the Java file
                                 JavaCompiler javaCompiler = new JavaCompiler(selectedDirectory);
                                 Output output = javaCompiler.compile(file.getAbsolutePath(), "");
 
-
+                                Submission sub = null;
                                 // Process the compilation result
                                 if (output.getExitCode() == 0) {
                                     // Compilation successful
                                     System.out.println("File: " + file.getName() + " compiled successfully");
 
                                     // Add a TreeItem to the TreeView
-                                    Submission sub = new Submission(file.getParent(), output.getOutput(), conf.expectedOutput);
+                                    File[] filess = directory.listFiles();
+                                    if (files == null) {
+                                        return;
+                                    }
+
+                                    for (File c1 : files) {
+                                        if (c1.isFile() && c1.getName().toLowerCase().endsWith(".zip")) {
+                                            output.setOutput("Correct");
+                                            String name1 = c1.getName().substring(0,c1.getName().length()-4);
+                                            sub = new Submission(name1, output.getOutput(), conf.expectedOutput);
+                                        }
+                                    }
+
+
                                     if(Objects.equals(output.getOutput(), expectedOutput.toString())){
-                                        output.setOutput("Correct");
+
+
+
                                         TreeItem<Submission> newItem = new TreeItem<>(sub);
                                         treeView.getRoot().getChildren().add(newItem);
 
                                     }else{
-                                        output.setOutput("Incorrect");
+                                        // Add a TreeItem to the TreeView
+                                        File[] files2 = directory.listFiles();
+                                        if (files2 == null) {
+                                            return;
+                                        }
+
+                                        for (File c2 : files2) {
+                                            if (c2.isFile() && c2.getName().toLowerCase().endsWith(".zip")) {
+                                                output.setOutput("Incorrect");
+                                                String name2 = c2.getName().substring(0,c2.getName().length()-4);
+                                                sub = new Submission(name2, output.getOutput(), conf.expectedOutput);
+                                            }
+                                        }
+
                                         TreeItem<Submission> newItem = new TreeItem<>(sub);
                                         treeView.getRoot().getChildren().add(newItem);
                                     }
@@ -161,7 +191,21 @@ public class AppController {
 
 
                                 } else {
-                                    Submission submission = new Submission(file.getName(), "Incorrect", conf.expectedOutput);
+                                    Submission submission= null;
+
+                                    File[] files3 = directory.listFiles();
+                                    if (files3 == null) {
+                                        return;
+                                    }
+
+                                    for (File c3 : files3) {
+                                        if (c3.isFile() && c3.getName().toLowerCase().endsWith(".zip")) {
+
+                                            String name3 = c3.getName().substring(0,c3.getName().length()-4);
+                                            submission = new Submission(name3, "Incorrect", conf.expectedOutput);
+                                        }
+                                    }
+
                                     TreeItem<Submission> newSubmission = new TreeItem<>(submission);
                                     treeView.getRoot().getChildren().add(newSubmission);
                                     // Compilation failed
