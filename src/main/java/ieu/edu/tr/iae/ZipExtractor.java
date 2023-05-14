@@ -1,39 +1,63 @@
 package ieu.edu.tr.iae;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 public class ZipExtractor {
 
-    public void extract(String zipFilePath, String destinationPath) throws IOException {
-        File destDir = new File(destinationPath);
-        if (!destDir.exists()) {
-            destDir.mkdirs();
+    static ArrayList<String> namesofZipFiles = new ArrayList<>();
+
+    public void extractZipFilesInDirectory(String directoryPath) throws IOException {
+        File directory = new File(directoryPath);
+        if (!directory.isDirectory()) {
+            throw new IllegalArgumentException("The provided path is not a directory.");
         }
 
-        try (ZipInputStream zipIn = new ZipInputStream(new FileInputStream(zipFilePath))) {
-            ZipEntry entry = zipIn.getNextEntry();
-            while (entry != null) {
-                String filePath = destinationPath + File.separator + entry.getName();
-                if (!entry.isDirectory()) {
-                    extractFile(zipIn, filePath);
-                } else {
-                    File dir = new File(filePath);
-                    dir.mkdirs();
-                }
-                zipIn.closeEntry();
-                entry = zipIn.getNextEntry();
+        File[] files = directory.listFiles();
+        if (files == null) {
+            return;
+        }
+
+        for (File file : files) {
+            if (file.isFile() && file.getName().toLowerCase().endsWith(".zip")) {
+                System.out.println(file.getName());
+                namesofZipFiles.add(file.getName());
+                extractZipFile(file, directory);
             }
         }
     }
 
-    private void extractFile(ZipInputStream zipIn, String filePath) throws IOException {
-        try (BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(filePath))) {
-            byte[] buffer = new byte[1024];
-            int bytesRead;
-            while ((bytesRead = zipIn.read(buffer)) != -1) {
-                bos.write(buffer, 0, bytesRead);
+    private void extractZipFile(File zipFile, File destinationDirectory) throws IOException {
+        byte[] buffer = new byte[4096];
+
+        try (ZipInputStream zipInputStream = new ZipInputStream(new FileInputStream(zipFile))) {
+            ZipEntry entry = zipInputStream.getNextEntry();
+            while (entry != null) {
+                String entryFileName = entry.getName();
+                File entryFile = new File(destinationDirectory, entryFileName);
+
+                if (entry.isDirectory()) {
+                    entryFile.mkdirs();
+                } else {
+                    // Ensure the parent directories exist
+                    entryFile.getParentFile().mkdirs();
+
+                    // Extract the file
+                    try (FileOutputStream outputStream = new FileOutputStream(entryFile)) {
+                        int readBytes;
+                        while ((readBytes = zipInputStream.read(buffer)) != -1) {
+                            outputStream.write(buffer, 0, readBytes);
+                        }
+                    }
+                }
+
+                zipInputStream.closeEntry();
+                entry = zipInputStream.getNextEntry();
             }
         }
     }

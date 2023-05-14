@@ -6,17 +6,19 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseButton;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.stage.DirectoryChooser;
 import org.sqlite.SQLiteException;
+import javafx.scene.paint.Color;
 
 import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Objects;
 import java.util.Optional;
 
 
@@ -35,7 +37,7 @@ public class AppController {
 
     private TreeItem<Submission> root;
 
-    Configuration conf = null;
+    Configuration conf = Configuration.getInstance();
 
     ComboBox<String> config = new ComboBox<>();
     TextField compilerPath=  new TextField();
@@ -44,6 +46,8 @@ public class AppController {
     TextField assignmentPath=  new TextField();
     TextField name=  new TextField();
     File selectedDirectory = null;
+
+    File directory = null;
 
     @FXML
     private void initialize() throws SQLException, ClassNotFoundException {
@@ -123,17 +127,18 @@ public class AppController {
             try {
                 // Extract zip files in the selected directory
                 ZipExtractor zipExtractor = new ZipExtractor();
-                zipExtractor.extract(String.valueOf(selectedDirectory), "./extractedFiles/");
+                zipExtractor.extractZipFilesInDirectory(selectedDirectory.toString());
 
                 // Compile and get results for each extracted file
                 File[] files = selectedDirectory.listFiles();
                 if (files != null) {
                     for (File file : files) {
                         if (file.isFile() && file.getName().toLowerCase().endsWith(".java")) {
-                            if (conf.name.equals("Java")) {
+                            if (conf.compilerPath.equals("javac")) {
                                 // Compile the Java file
                                 JavaCompiler javaCompiler = new JavaCompiler(selectedDirectory);
                                 Output output = javaCompiler.compile(file.getAbsolutePath(), "");
+
 
                                 // Process the compilation result
                                 if (output.getExitCode() == 0) {
@@ -141,12 +146,24 @@ public class AppController {
                                     System.out.println("File: " + file.getName() + " compiled successfully");
 
                                     // Add a TreeItem to the TreeView
-                                    Submission sub = new Submission(file.getName(), output.getOutput(), conf.expectedOutput);
-                                    TreeItem<Submission> newItem = new TreeItem<>(sub);
+                                    Submission sub = new Submission(file.getParent(), output.getOutput(), conf.expectedOutput);
+                                    if(Objects.equals(output.getOutput(), expectedOutput.toString())){
+                                        output.setOutput("Correct");
+                                        TreeItem<Submission> newItem = new TreeItem<>(sub);
+                                        treeView.getRoot().getChildren().add(newItem);
 
-                                    treeView.getRoot().getChildren().add(newItem);
+                                    }else{
+                                        output.setOutput("Incorrect");
+                                        TreeItem<Submission> newItem = new TreeItem<>(sub);
+                                        treeView.getRoot().getChildren().add(newItem);
+                                    }
+
+
 
                                 } else {
+                                    Submission submission = new Submission(file.getName(), "Incorrect", conf.expectedOutput);
+                                    TreeItem<Submission> newSubmission = new TreeItem<>(submission);
+                                    treeView.getRoot().getChildren().add(newSubmission);
                                     // Compilation failed
                                     System.out.println("File: " + file.getName() + " compilation failed");
                                     System.out.println("Output: " + output.getOutput());
@@ -154,7 +171,7 @@ public class AppController {
                                 }
                             }
                         } else if (file.isFile() && file.getName().toLowerCase().endsWith(".py")) {
-                            if (conf.name.equals("Python")) {
+                            if (conf.compilerPath.equals("python3")) {
                                 // Compile the Python file
                                 PythonInterpreter pythonCompiler = new PythonInterpreter(selectedDirectory);
                                 Output output = pythonCompiler.compile(file.getAbsolutePath(), "");
@@ -164,14 +181,24 @@ public class AppController {
                                     // Compilation successful
                                     System.out.println("File: " + file.getName() + " compiled successfully");
 
-                                    // Add a TreeItem to the TreeView
                                     Submission sub = new Submission(file.getName(), output.getOutput(), conf.expectedOutput);
-                                    TreeItem<Submission> newItem = new TreeItem<>(sub);
+                                    if(Objects.equals(output.getOutput(), conf.expectedOutput.toString())){
+                                        output.setOutput("Correct");
+                                        TreeItem<Submission> newItem = new TreeItem<>(sub);
+                                        treeView.getRoot().getChildren().add(newItem);
 
-                                    treeView.getRoot().getChildren().add(newItem);
+                                    }else{
+                                        output.setOutput("Incorrect");
+                                        TreeItem<Submission> newItem = new TreeItem<>(sub);
+                                        treeView.getRoot().getChildren().add(newItem);
+                                    }
+
 
                                 } else {
                                     // Compilation failed
+                                    Submission submission = new Submission(file.getName(), "Incorrect", conf.expectedOutput);
+                                    TreeItem<Submission> newSubmission = new TreeItem<>(submission);
+                                    treeView.getRoot().getChildren().add(newSubmission);
                                     System.out.println("File: " + file.getName() + " compilation failed");
                                     System.out.println("Output: " + output.getOutput());
                                     System.out.println("Error: " + output.getError());
@@ -179,22 +206,34 @@ public class AppController {
                             }
                         }
                         else if (file.isFile() && file.getName().toLowerCase().endsWith(".c")) {
-                            if (conf.name.equals("C")) {
+                            if (conf.compilerPath.equals("gcc")) {
                                 // Compile the C file
                                 CCompiler cCompiler = new CCompiler(selectedDirectory);
                                 Output output = cCompiler.compile(file.getAbsolutePath(), "");
+
+
 
                                 // Process the compilation result
                                 if (output.getExitCode() == 0) {
                                     // Compilation successful
                                     System.out.println("File: " + file.getName() + " compiled successfully");
 
-                                    // Add a TreeItem to the TreeView
                                     Submission sub = new Submission(file.getName(), output.getOutput(), conf.expectedOutput);
-                                    TreeItem<Submission> newItem = new TreeItem<>(sub);
+                                    if(Objects.equals(output.getOutput(), expectedOutput.toString())){
+                                        output.setOutput("Correct");
+                                        TreeItem<Submission> newItem = new TreeItem<>(sub);
+                                        treeView.getRoot().getChildren().add(newItem);
 
-                                    treeView.getRoot().getChildren().add(newItem);
+                                    }else{
+                                        output.setOutput("Incorrect");
+                                        TreeItem<Submission> newItem = new TreeItem<>(sub);
+                                        treeView.getRoot().getChildren().add(newItem);
+                                    }
+
                                 } else {
+                                    Submission submission = new Submission(file.getName(), "Incorrect", conf.expectedOutput);
+                                    TreeItem<Submission> newSubmission = new TreeItem<>(submission);
+                                    treeView.getRoot().getChildren().add(newSubmission);
                                     // Compilation failed
                                     System.out.println("File: " + file.getName() + " compilation failed");
                                     System.out.println("Output: " + output.getOutput());
@@ -293,6 +332,8 @@ public class AppController {
                 selectedDirectory = directoryChooser.showDialog(pane.getScene().getWindow());
                 if (selectedDirectory != null) {
                     assignmentPath.setText(selectedDirectory.getPath());
+                    conf.assignmentPath = assignmentPath.getText();
+                     directory = new File(conf.assignmentPath);
                 }
             });
 
@@ -323,7 +364,7 @@ public class AppController {
 
             dialog.setResultConverter(type -> {
                 if (type == ButtonType.OK) {
-                    saveConfig(assignmentPath.getText());
+                    saveConfig(String.valueOf(directory));
                 }
                 return null;
             });
