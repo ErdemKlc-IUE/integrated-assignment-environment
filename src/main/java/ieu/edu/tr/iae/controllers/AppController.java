@@ -88,7 +88,7 @@ public class AppController {
                 DialogPane pane = new DialogPane();
                 pane.setMaxHeight(700);
                 pane.setMaxWidth(400);
-                pane.getStylesheets().add("style.css");
+             //   pane.getStylesheets().add("style.css");
                 pane.getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
                 d.setDialogPane(pane);
                 VBox box = new VBox();
@@ -177,7 +177,6 @@ public class AppController {
                                                 TreeItem<Submission> newItem = new TreeItem<>(sub);
                                                 treeView.getRoot().getChildren().add(newItem);
 
-
                                         }
                                     }
 
@@ -232,6 +231,8 @@ public class AppController {
                                             System.out.println(sub2.getId());
                                             System.out.println(sub2.getExpectedOutput());
                                             System.out.println(sub2.getOutput());
+
+
 
                                             output.setOutput("Correct");
                                             System.out.println("---");
@@ -365,9 +366,6 @@ public class AppController {
                 alert.showAndWait();
             }
         });
-
-
-
 
 
         configButton.setOnAction((value) -> {

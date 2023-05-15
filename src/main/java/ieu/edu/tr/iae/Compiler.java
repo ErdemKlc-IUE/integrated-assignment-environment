@@ -1,7 +1,5 @@
 package ieu.edu.tr.iae;
 
-
-
 import java.io.*;
 
 public abstract class Compiler {
