@@ -10,8 +10,6 @@ import java.util.zip.ZipInputStream;
 
 public class ZipExtractor {
 
-    static ArrayList<String> namesofZipFiles = new ArrayList<>();
-
     public void extractZipFilesInDirectory(String directoryPath) throws IOException {
         File directory = new File(directoryPath);
         if (!directory.isDirectory()) {
@@ -26,7 +24,6 @@ public class ZipExtractor {
         for (File file : files) {
             if (file.isFile() && file.getName().toLowerCase().endsWith(".zip")) {
                 System.out.println(file.getName());
-                namesofZipFiles.add(file.getName());
                 extractZipFile(file, directory);
             }
         }
