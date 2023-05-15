@@ -113,7 +113,11 @@ public class AppController {
             alert.setHeaderText("Click "+ "'Show Details'" +" to see the help information");
             alert.setContentText("Welcome to IAE");
             TextArea area = new TextArea();
-            area.setText("1) Choose or create a configuration\n2) Fill the input fields then press 'OK'\n3) Press Run to populate treeview");
+            area.setText("1) Choose or create a configuration\n2) Fill the input fields then press 'OK' and for the assignment path please choose the folder that include project zip files." +
+                    "\n3) Press Run to populate treeview" +
+                    "\n4)For the configuration add part, please fill all the input fields." +
+                    " \n5)For the configuration edit part, the name that is entered into the input field must be the same with the one chosen in the ComboBox." +
+                    "\n6)For the configuration delete part, the selected ComboBox is deleted.");
             area.setWrapText(true);
             area.setEditable(false);
 
@@ -141,8 +145,8 @@ public class AppController {
                                 System.out.println("selected directory"+selectedDirectory);
 
 
-                                    JavaCompiler javaCompiler = new JavaCompiler(selectedDirectory);
-                                   Output output = javaCompiler.compile(file.getPath(), conf.args);
+                                JavaCompiler javaCompiler = new JavaCompiler(selectedDirectory);
+                                Output output = javaCompiler.compile(file.getPath(), conf.args);
 
                                 System.out.println(file.getPath());
                                 System.out.println(output.getOutput());
@@ -170,10 +174,15 @@ public class AppController {
                                             System.out.println(sub.getExpectedOutput());
                                             System.out.println(sub.getOutput());
 
-                                                output.setOutput("Correct");
-                                                System.out.println("---");
 
-                                                TreeItem<Submission> newItem = new TreeItem<>(sub);
+                                            if (sub.getOutput().equals(sub.getExpectedOutput())) {
+                                                System.out.println("Output matches expected output for submission: " + sub.getId());
+                                            } else {
+                                                System.out.println("Output does not match expected output for submission: " + sub.getId());
+                                            }
+
+
+                                            TreeItem<Submission> newItem = new TreeItem<>(sub);
                                                 treeView.getRoot().getChildren().add(newItem);
 
                                         }
@@ -233,8 +242,11 @@ public class AppController {
 
 
 
-                                            output.setOutput("Correct");
-                                            System.out.println("---");
+                                            if (sub2.getOutput().equals(sub2.getExpectedOutput())) {
+                                                System.out.println("Output matches expected output for submission: " + sub2.getId());
+                                            } else {
+                                                System.out.println("Output does not match expected output for submission: " + sub2.getId());
+                                            }
 
                                             TreeItem<Submission> newItem = new TreeItem<>(sub2);
                                             treeView.getRoot().getChildren().add(newItem);
@@ -242,8 +254,6 @@ public class AppController {
 
                                         }
                                     }
-
-
 
 
 
@@ -287,8 +297,12 @@ public class AppController {
                                             System.out.println(sub3.getExpectedOutput());
                                             System.out.println(sub3.getOutput());
 
-                                            output.setOutput("Correct");
-                                            System.out.println("---");
+
+                                            if (sub3.getOutput().equals(sub3.getExpectedOutput())) {
+                                                System.out.println("Output matches expected output for submission: " + sub3.getId());
+                                            } else {
+                                                System.out.println("Output does not match expected output for submission: " + sub3.getId());
+                                            }
 
                                             TreeItem<Submission> newItem = new TreeItem<>(sub3);
                                             treeView.getRoot().getChildren().add(newItem);
@@ -321,7 +335,13 @@ public class AppController {
 
                                     Submission sub = new Submission(file.getName(), output.getOutput(), conf.expectedOutput);
 
-                                        output.setOutput("Correct");
+
+                                    if (sub.getOutput().equals(sub.getExpectedOutput())) {
+                                        System.out.println("Output matches expected output for submission: " + sub.getId());
+                                    } else {
+                                        System.out.println("Output does not match expected output for submission: " + sub.getId());
+                                    }
+
                                         TreeItem<Submission> newItem = new TreeItem<>(sub);
                                         treeView.getRoot().getChildren().add(newItem);
 
@@ -335,6 +355,7 @@ public class AppController {
                                     System.out.println("Output: " + output.getOutput());
                                     System.out.println("Error: " + output.getError());
                                 }
+
                             }
                         }
                     }

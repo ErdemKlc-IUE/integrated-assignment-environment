@@ -34,4 +34,6 @@ public class Submission {
     public void setExpectedOutput(String expectedOutput) {
         this.expectedOutput = expectedOutput;
     }
+
+
 }

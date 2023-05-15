@@ -23,5 +23,6 @@ public class Configuration {
         this.args = args;
         this.expectedOutput = expectedOutput;
     }
-    public Configuration(){}
+    public Configuration(){
+    }
 }
