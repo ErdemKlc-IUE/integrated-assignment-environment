@@ -23,6 +23,7 @@ public class Database {
         final Statement statement = connection.createStatement();
         final String query = "create table if not exists config_table " +
                 "(ID INTEGER primary key AUTOINCREMENT," +
+                " assignmentPath varchar(255),"+
                 "compilerPath varchar(255)," +
                 " args varchar(255)," +
                 " name varchar(255)," +
@@ -30,28 +31,52 @@ public class Database {
         statement.executeUpdate(query);
         statement.close();
     }
-    public void addConfig(String compilerPath, String args,String name, String expectedOutput) throws SQLException {
-        String query = "INSERT INTO config_table (compilerPath, args,name, expectedOutput) VALUES (?, ?, ?, ?);";
+    public void addConfig(String assignmentPath, String compilerPath, String args,String name, String expectedOutput) throws SQLException {
+        String query = "INSERT INTO config_table (assignmentPath, compilerPath, args,name, expectedOutput) VALUES (?, ?, ?, ?, ?);";
         PreparedStatement preparedStatement = connection.prepareStatement(query);
 
-        preparedStatement.setString(1, compilerPath);
-        preparedStatement.setString(2, args);
-        preparedStatement.setString(3, name);
-        preparedStatement.setString(4, expectedOutput);
+        preparedStatement.setString(1, assignmentPath);
+        preparedStatement.setString(2, compilerPath);
+        preparedStatement.setString(3, args);
+        preparedStatement.setString(4, name);
+        preparedStatement.setString(5, expectedOutput);
+
+        preparedStatement.executeUpdate();
+        preparedStatement.close();
+    }
+    public void deleteConfig(String name) throws SQLException {
+        String query = "DELETE FROM config_table WHERE name = ?;";
+        PreparedStatement preparedStatement = connection.prepareStatement(query);
+
+        preparedStatement.setString(1, name);
 
         preparedStatement.executeUpdate();
         preparedStatement.close();
     }
 
-    public Configuration getConfig() throws SQLException {
+    public void editConfig(String assignmentPath,String compilerPath, String args,String name, String expectedOutput) throws SQLException {
+        String query = "UPDATE config_table SET assignmentPath = ?, compilerPath = ?, args = ?, expectedOutput = ? WHERE name = ?;";
+        PreparedStatement preparedStatement = connection.prepareStatement(query);
+
+        preparedStatement.setString(1, assignmentPath);
+        preparedStatement.setString(2, compilerPath);
+        preparedStatement.setString(3, args);
+        preparedStatement.setString(4, expectedOutput);
+        preparedStatement.setString(5, name);
+
+        preparedStatement.executeUpdate();
+        preparedStatement.close();
+    }
+    public Configuration getConfig(String name) throws SQLException {
 
         Configuration configuration = Configuration.getInstance();
 
-        String query = "SELECT compilerPath, args,name, expectedOutput FROM config_table WHERE ID = 1;";
+        String query = "SELECT assignmentPath, compilerPath, args,name, expectedOutput FROM config_table WHERE ID ="+name+";";
         Statement statement = connection.createStatement();
         ResultSet resultSet = statement.executeQuery(query);
 
         if (resultSet.next()) {
+            configuration.assignmentPath = resultSet.getString("assignmentPath");
             configuration.compilerPath = resultSet.getString("compilerPath");
             configuration.args = resultSet.getString("args");
             configuration.name = resultSet.getString("name");

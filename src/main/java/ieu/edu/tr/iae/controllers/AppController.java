@@ -48,6 +48,7 @@ public class AppController {
     File selectedDirectory = null;
 
     File directory = null;
+    ObservableList<String> configList = FXCollections.observableArrayList();
 
     @FXML
     private void initialize() throws SQLException, ClassNotFoundException {
@@ -55,7 +56,6 @@ public class AppController {
         Database database = Database.getInstance();
         database.open();
 
-        ObservableList<String> configList = FXCollections.observableArrayList();
         configList.addAll("JavaConfig","PythonConfig","CConfig","CPPConfig","OptionalConfig");
 
         root = new TreeItem<Submission>(new Submission("Submissions","-1","-1"));
@@ -110,17 +110,16 @@ public class AppController {
         menuItemHelp.setOnAction((value) -> {
             Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
             alert.setTitle("Help");
-            alert.setHeaderText("Help");
+            alert.setHeaderText("Click "+ "'Show Details'" +" to see the help information");
             alert.setContentText("Welcome to IAE");
-            TextArea area = new TextArea(menuItemHelp.getText());
-            area.setText("Welcome to IAE");
+            TextArea area = new TextArea();
+            area.setText("1) Choose or create a configuration\n2) Fill the input fields then press 'OK'\n3) Press Run to populate treeview");
             area.setWrapText(true);
             area.setEditable(false);
 
             alert.getDialogPane().setExpandableContent(area);
             alert.showAndWait();
         });
-
 
 
         runButton.setOnAction(actionEvent -> {
@@ -139,7 +138,7 @@ public class AppController {
                         if (file.isFile() && file.getName().toLowerCase().endsWith(".java")) {
                             if (conf.compilerPath.equals("javac")) {
                                 // Compile the Java file
-                                System.out.println("selected driectory"+selectedDirectory);
+                                System.out.println("selected directory"+selectedDirectory);
 
 
                                     JavaCompiler javaCompiler = new JavaCompiler(selectedDirectory);
@@ -405,23 +404,14 @@ public class AppController {
                         Configuration.getInstance().name = "CPP";
                         compilerPath.setText("g++");
                         args.setText("main.cpp");
-
-
                     }
-
                 }
             });
 
 
             name.setPromptText("name");
-
-
             compilerPath.setPromptText("compiler path");
-
-
             args.setPromptText("args");
-
-
             expectedOutput.setPromptText("expected output");
 
 
@@ -457,14 +447,21 @@ public class AppController {
                     expectedOutput
             );
             pane.setContent(box);
-            pane.getButtonTypes().addAll(ButtonType.OK, ButtonType.CLOSE);
+            ButtonType add = new ButtonType("Add");
+            ButtonType edit = new ButtonType("Edit");
+            ButtonType delete = new ButtonType("Delete");
+            pane.getButtonTypes().addAll(add, edit, delete, ButtonType.CANCEL);
             Dialog<Configuration> dialog = new Dialog<>();
-            dialog.setTitle("add");
+            dialog.setTitle("Configuration");
             dialog.setDialogPane(pane);
 
             dialog.setResultConverter(type -> {
-                if (type == ButtonType.OK) {
+                if (type == add) {
                     saveConfig(String.valueOf(directory));
+                } else if (type == delete) {
+                    deleteConfig();
+                } else if (type == edit) {
+                    updateConfig();
                 }
                 return null;
             });
@@ -484,7 +481,7 @@ public class AppController {
         try {
             if (!selectedDirectory.isEmpty()) {
                 Database.getInstance().open();
-                Database.getInstance().addConfig(compilerPath.getText(), args.getText(),name.getText(), expectedOutput.getText());
+                Database.getInstance().addConfig(assignmentPath.getText(), compilerPath.getText(), args.getText(),name.getText(), expectedOutput.getText());
 
                 Database.getInstance().disconnect();
 
@@ -494,10 +491,10 @@ public class AppController {
                 conf.expectedOutput = expectedOutput.getText();
                 conf.args = args.getText();
                 conf.assignmentPath = assignmentPath.getText();
-
+                configList.add(conf.name);
 
                 Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-                alert.setTitle("Condig save");
+                alert.setTitle("Config save");
                 alert.setHeaderText("Config save");
                 alert.setContentText("Configuration saved.");
                 alert.showAndWait();
@@ -508,11 +505,51 @@ public class AppController {
                 assignmentPath.setText("");
                 compilerPath.setText("");
 
+
                 System.out.println("Added");
             }
         } catch (SQLException e) {
             e.printStackTrace();
 
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    public void deleteConfig(){
+        try {
+            Database.getInstance().open();
+            Database.getInstance().deleteConfig(config.getValue());
+            Database.getInstance().disconnect();
+            configList.removeAll(config.getValue());
+
+            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+            alert.setTitle("Config delete");
+            alert.setHeaderText("Config delete");
+            alert.setContentText("Configuration deleted.");
+            alert.showAndWait();
+            System.out.println("Deleted");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    public void updateConfig(){
+        try {
+            Database.getInstance().open();
+            Database.getInstance().editConfig(assignmentPath.getText() ,compilerPath.getText(), args.getText(),name.getText(), expectedOutput.getText());
+            Database.getInstance().disconnect();
+
+
+
+            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+            alert.setTitle("Config update");
+            alert.setHeaderText("Config update");
+            alert.setContentText("Configuration updated.");
+            alert.showAndWait();
+            System.out.println("Updated");
+        } catch (SQLException e) {
+            e.printStackTrace();
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
