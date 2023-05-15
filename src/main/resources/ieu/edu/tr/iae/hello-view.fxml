@@ -9,7 +9,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="484.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ieu.edu.tr.iae.controllers.AppController">
+<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="484.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ieu.edu.tr.iae.controllers.AppController">
    <children>
       <HBox prefHeight="33.0" prefWidth="600.0">
          <children>
@@ -24,9 +24,9 @@
             </MenuBar>
          </children>
       </HBox>
-      <HBox prefHeight="459.0" prefWidth="600.0">
+      <HBox prefHeight="520.0" prefWidth="600.0">
          <children>
-            <VBox prefHeight="455.0" prefWidth="387.0">
+            <VBox prefHeight="422.0" prefWidth="396.0">
                <children>
                   <TreeView fx:id="treeView" prefHeight="381.0" prefWidth="357.0">
                      <VBox.margin>
@@ -35,13 +35,17 @@
                   </TreeView>
                </children>
             </VBox>
-            <VBox prefHeight="455.0" prefWidth="213.0" spacing="20.0">
+            <VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="461.0" prefWidth="212.0" spacing="20.0">
                <children>
+                  <Button fx:id="runButton" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefWidth="70.0" text="Run">
+                     <VBox.margin>
+                        <Insets />
+                     </VBox.margin>
+                  </Button>
                   <Button fx:id="configButton" mnemonicParsing="false" prefWidth="70.0" text="Config" />
-                  <Button fx:id="runButton" mnemonicParsing="false" prefWidth="70.0" text="Run" />
                </children>
                <padding>
-                  <Insets left="100.0" top="300.0" />
+                  <Insets left="100.0" top="250.0" />
                </padding>
                <HBox.margin>
                   <Insets />
