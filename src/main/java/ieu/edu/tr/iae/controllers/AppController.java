@@ -6,20 +6,17 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.*;
 import javafx.stage.DirectoryChooser;
-import org.sqlite.SQLiteException;
-import javafx.scene.paint.Color;
 
 import java.io.File;
 import java.io.IOException;
-import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Objects;
+import java.util.ArrayList;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
 
 
 public class AppController {
@@ -31,6 +28,12 @@ public class AppController {
 
     @FXML
     private MenuItem menuItemHelp;
+
+    @FXML
+    private MenuItem menuItemImport;
+
+    @FXML
+    private MenuItem menuItemExport;
 
     @FXML
     private TreeView<Submission> treeView;
@@ -49,14 +52,23 @@ public class AppController {
 
     File directory = null;
     ObservableList<String> configList = FXCollections.observableArrayList();
+    ArrayList<Configuration> configurations = new ArrayList<>();
 
     @FXML
     private void initialize() throws SQLException, ClassNotFoundException {
         System.out.println("-************************************");
         Database database = Database.getInstance();
         database.open();
+/*
+        Configuration javaConf = new Configuration("JavaConfig",null,"javac","main.java",null);
+        Configuration pythonConf = new Configuration("PythonConfig",null,"python3","main.py",null);
+        Configuration cConf = new Configuration("CConfig",null,"gcc","main.c",null);
+        Configuration cppConf = new Configuration("CPPConfig",null,"g++","main.cpp",null);
+        configurations.addAll(javaConf,pythonConf,cConf,cppConf);
 
+ */
         configList.addAll("JavaConfig","PythonConfig","CConfig","CPPConfig","OptionalConfig");
+
 
         root = new TreeItem<Submission>(new Submission("Submissions","-1","-1"));
         root.setExpanded(true);
@@ -124,6 +136,79 @@ public class AppController {
             alert.getDialogPane().setExpandableContent(area);
             alert.showAndWait();
         });
+
+        menuItemImport.setOnAction((value) -> {
+            Configuration conf = null;
+            try {
+                conf = FileHandler.importConf();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (SQLException throwables) {
+                throwables.printStackTrace();
+            }
+
+            if (conf == null) {
+                return;
+            }
+
+            try {
+                database.addConfig(null,conf.compilerPath,conf.args,conf.name,null);
+            } catch (SQLException throwables) {
+                throwables.printStackTrace();
+            }
+            configList.add(conf.name);
+            configurations.add(conf);
+
+        });
+
+        menuItemExport.setOnAction((value) -> {
+            DialogPane pane = new DialogPane();
+            TextField confName = new TextField();
+            Button export = new Button("Export");
+            ListView <String> confList = new ListView<>();
+            confList.getItems().addAll(configList);
+            //pane.getStylesheets().add("style.css");
+
+            HBox exportBox = new HBox();
+            exportBox.getChildren().addAll(confName,export);
+
+            config.setPromptText("Export Configurations");
+
+            export.setOnAction(actionEvent -> {
+                Configuration expConf = findConfiguration(confName.getText());
+            if(expConf == null) {
+                return;
+            }
+
+            try {
+                    FileHandler.exportConf(expConf);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            });
+
+            pane.setMaxHeight(600);
+            pane.setMaxWidth(400);
+            VBox box = new VBox();
+            box.setSpacing(3);
+            Dialog<Configuration> dialog = new Dialog<>();
+            dialog.setTitle("Export Configurations");
+            dialog.setDialogPane(pane);
+            pane.getButtonTypes().addAll(ButtonType.CANCEL);
+
+            box.getChildren().addAll(exportBox,confList);
+
+            pane.setContent(box);
+
+            Optional<Configuration> optional = dialog.showAndWait();
+            if (optional.isPresent()) {
+                Configuration config = optional.get();
+                // Process the configuration
+            }
+
+        });
+
+
 
 
         runButton.setOnAction(actionEvent -> {
@@ -387,7 +472,7 @@ public class AppController {
             }
         });
 
-
+//
         configButton.setOnAction((value) -> {
             DialogPane pane = new DialogPane();
             pane.getStylesheets().add("style.css");
@@ -513,6 +598,7 @@ public class AppController {
                 conf.args = args.getText();
                 conf.assignmentPath = assignmentPath.getText();
                 configList.add(conf.name);
+                configurations.add(conf);
 
                 Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
                 alert.setTitle("Config save");
@@ -575,4 +661,14 @@ public class AppController {
             throw new RuntimeException(e);
         }
     }
+
+    public Configuration findConfiguration(String name){
+        for(Configuration c : configurations){
+            if(c.name.equals(name)){
+                return c;
+            }
+        }
+        return null;
+    }
+
 }

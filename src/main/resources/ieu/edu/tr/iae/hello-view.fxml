@@ -9,12 +9,18 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="484.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ieu.edu.tr.iae.controllers.AppController">
+<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="484.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ieu.edu.tr.iae.controllers.AppController">
    <children>
       <HBox prefHeight="33.0" prefWidth="600.0">
          <children>
             <MenuBar prefHeight="26.0" prefWidth="601.0">
                <menus>
+                  <Menu mnemonicParsing="false" text="Configurations">
+                    <items>
+                      <MenuItem fx:id="menuItemImport" mnemonicParsing="false" text="Import" />
+                        <MenuItem fx:id="menuItemExport" mnemonicParsing="false" text="Export" />
+                    </items>
+                  </Menu>
                   <Menu mnemonicParsing="false" text="Help">
                      <items>
                         <MenuItem fx:id="menuItemHelp" mnemonicParsing="false" text="Help" />
