@@ -10,6 +10,7 @@ import javafx.scene.control.*;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.*;
 import javafx.stage.DirectoryChooser;
+import javafx.stage.Stage;
 
 import java.io.File;
 import java.io.IOException;
@@ -72,6 +73,7 @@ public class AppController {
         configList.addAll("JavaConfig","PythonConfig","CConfig","CPPConfig","OptionalConfig");
         HashMap<String, Configuration> configsInDatabase =  database.getAllConfigs();
         configList.addAll(configsInDatabase.keySet());
+        configurations.addAll(configsInDatabase.values());
 
         System.out.println(configsInDatabase.keySet());
 
@@ -105,7 +107,7 @@ public class AppController {
                 DialogPane pane = new DialogPane();
                 pane.setMaxHeight(700);
                 pane.setMaxWidth(400);
-             //   pane.getStylesheets().add("style.css");
+                //   pane.getStylesheets().add("style.css");
                 pane.getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
                 d.setDialogPane(pane);
                 VBox box = new VBox();
@@ -181,15 +183,23 @@ public class AppController {
 
             export.setOnAction(actionEvent -> {
                 Configuration expConf = findConfiguration(confName.getText());
-            if(expConf == null) {
-                return;
-            }
+                if(expConf == null) {
+                    return;
+                }
 
-            try {
+                try {
                     FileHandler.exportConf(expConf);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
+            });
+
+            Button cancel = new Button("Cancel");
+
+            cancel.setOnAction(event -> {
+                // Get the current stage and close it
+                Stage currentStage = (Stage) cancel.getScene().getWindow();
+                currentStage.close();
             });
 
             pane.setMaxHeight(600);
@@ -199,9 +209,8 @@ public class AppController {
             Dialog<Configuration> dialog = new Dialog<>();
             dialog.setTitle("Export Configurations");
             dialog.setDialogPane(pane);
-            pane.getButtonTypes().addAll(ButtonType.CANCEL);
 
-            box.getChildren().addAll(exportBox,confList);
+            box.getChildren().addAll(exportBox,confList,cancel);
 
             pane.setContent(box);
 
@@ -273,7 +282,7 @@ public class AppController {
 
 
                                             TreeItem<Submission> newItem = new TreeItem<>(sub);
-                                                treeView.getRoot().getChildren().add(newItem);
+                                            treeView.getRoot().getChildren().add(newItem);
 
                                         }
                                     }
@@ -432,8 +441,8 @@ public class AppController {
                                         System.out.println("Output does not match expected output for submission: " + sub.getId());
                                     }
 
-                                        TreeItem<Submission> newItem = new TreeItem<>(sub);
-                                        treeView.getRoot().getChildren().add(newItem);
+                                    TreeItem<Submission> newItem = new TreeItem<>(sub);
+                                    treeView.getRoot().getChildren().add(newItem);
 
 
                                 } else {
@@ -564,7 +573,7 @@ public class AppController {
                 if (selectedDirectory != null) {
                     assignmentPath.setText(selectedDirectory.getPath());
                     conf.assignmentPath = assignmentPath.getText();
-                     directory = new File(conf.assignmentPath);
+                    directory = new File(conf.assignmentPath);
                 }
             });
 

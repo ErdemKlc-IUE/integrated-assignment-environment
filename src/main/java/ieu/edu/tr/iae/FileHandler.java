@@ -1,6 +1,7 @@
 package ieu.edu.tr.iae;
 
 import javafx.scene.control.Alert;
+import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 
 import java.io.*;
@@ -12,22 +13,38 @@ public class FileHandler {
 
     public static void exportConf(Configuration configuration) throws IOException {
 
-        String fileName = "extractedFiles\\configurations\\" + configuration.name + ".txt";
+        DirectoryChooser directoryChooser = new DirectoryChooser();
+        directoryChooser.setTitle("Choose Directory");
 
-        try {
-            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(fileName), StandardCharsets.UTF_8));
-            String text = configuration.name + "\n" + configuration.compilerPath + "\n" + configuration.args;
-            writer.write(text);
-            writer.close();
-        } catch (IOException e) {
-            e.printStackTrace();
+        // Set initial directory (optional)
+        directoryChooser.setInitialDirectory(new File(System.getProperty("user.home")));
+
+        // Show the directory selection dialog
+        File selectedDirectory = directoryChooser.showDialog(null);
+
+        if (selectedDirectory != null) {
+            // Perform the file export
+            exportTextFile(selectedDirectory,configuration);
         }
+
 
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("Export Configuration");
         alert.setHeaderText("Export Configuration Complete");
         alert.setContentText("Configuration is exported successfully.");
         alert.showAndWait();
+    }
+
+    public static void exportTextFile(File directory,Configuration conf) {
+        try {
+            File file = new File(directory, conf.name +".txt");
+            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8));
+            String text = conf.name + "\n" + conf.compilerPath + "\n" + conf.args;
+            writer.write(text);
+            writer.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public static Configuration importConf() throws IOException, SQLException {
