@@ -15,6 +15,7 @@ import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -67,8 +68,12 @@ public class AppController {
         configurations.addAll(javaConf,pythonConf,cConf,cppConf);
 
  */
-        configList.addAll("JavaConfig","PythonConfig","CConfig","CPPConfig","OptionalConfig");
 
+        configList.addAll("JavaConfig","PythonConfig","CConfig","CPPConfig","OptionalConfig");
+        HashMap<String, Configuration> configsInDatabase =  database.getAllConfigs();
+        configList.addAll(configsInDatabase.keySet());
+
+        System.out.println(configsInDatabase.keySet());
 
         root = new TreeItem<Submission>(new Submission("Submissions","-1","-1"));
         root.setExpanded(true);
@@ -152,7 +157,7 @@ public class AppController {
             }
 
             try {
-                database.addConfig(null,conf.compilerPath,conf.args,conf.name,null);
+                database.addConfig(conf.assignmentPath,conf.compilerPath,conf.args,conf.name,conf.expectedOutput);
             } catch (SQLException throwables) {
                 throwables.printStackTrace();
             }
@@ -492,24 +497,54 @@ public class AppController {
                         Configuration.getInstance().name = "C";
                         compilerPath.setText("gcc");
                         args.setText("main.c");
+                        name.setText(conf.name);
+                        expectedOutput.setText(conf.expectedOutput);
+                        assignmentPath.setText(conf.assignmentPath);
 
 
                     } else if (selectedComboBoxValue.equals("PythonConfig")) {
                         Configuration.getInstance().name = "Python";
                         compilerPath.setText("python3");
                         args.setText("main.py");
+                        name.setText(conf.name);
+                        expectedOutput.setText(conf.expectedOutput);
+                        assignmentPath.setText(conf.assignmentPath);
 
 
                     } else if (selectedComboBoxValue.equals("JavaConfig")) {
                         Configuration.getInstance().name = "Java";
                         compilerPath.setText("javac");
                         args.setText("main.java");
+                        name.setText(conf.name);
+                        expectedOutput.setText(conf.expectedOutput);
+                        assignmentPath.setText(conf.assignmentPath);
 
 
                     } else if (selectedComboBoxValue.equals("CPPConfig")) {
                         Configuration.getInstance().name = "CPP";
                         compilerPath.setText("g++");
                         args.setText("main.cpp");
+                        name.setText(conf.name);
+                        expectedOutput.setText(conf.expectedOutput);
+                        assignmentPath.setText(conf.assignmentPath);
+                    }else{
+                        try {
+                            System.out.println("---");
+                            database.open();
+                            Configuration conf = database.getConfig(selectedComboBoxValue);
+                            System.out.println(conf.name);
+                            compilerPath.setText(conf.compilerPath);
+                            args.setText(conf.args);
+                            name.setText(conf.name);
+                            expectedOutput.setText(conf.expectedOutput);
+                            assignmentPath.setText(conf.assignmentPath);
+                            System.out.println(conf.expectedOutput);
+
+                        } catch (SQLException e) {
+                            throw new RuntimeException(e);
+                        } catch (ClassNotFoundException e) {
+                            throw new RuntimeException(e);
+                        }
                     }
                 }
             });

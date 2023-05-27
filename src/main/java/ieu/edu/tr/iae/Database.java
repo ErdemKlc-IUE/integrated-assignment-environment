@@ -24,15 +24,15 @@ public class Database {
         final String query = "create table if not exists config_table " +
                 "(ID INTEGER primary key AUTOINCREMENT," +
                 " assignmentPath varchar(255),"+
-                "compilerPath varchar(255)," +
+                " compilerPath varchar(255)," +
                 " args varchar(255)," +
                 " name varchar(255)," +
-                "expectedOutput varchar(255));";
+                " expectedOutput varchar(255)); ";
         statement.executeUpdate(query);
         statement.close();
     }
     public void addConfig(String assignmentPath, String compilerPath, String args,String name, String expectedOutput) throws SQLException {
-        String query = "INSERT INTO config_table (assignmentPath, compilerPath, args,name, expectedOutput) VALUES (?, ?, ?, ?, ?);";
+        String query = "INSERT INTO config_table (assignmentPath, compilerPath, args, name, expectedOutput) VALUES (?, ?, ?, ?, ?); ";
         PreparedStatement preparedStatement = connection.prepareStatement(query);
 
         preparedStatement.setString(1, assignmentPath);
@@ -45,7 +45,7 @@ public class Database {
         preparedStatement.close();
     }
     public void deleteConfig(String name) throws SQLException {
-        String query = "DELETE FROM config_table WHERE name = ?;";
+        String query = "DELETE FROM config_table WHERE name = ?; ";
         PreparedStatement preparedStatement = connection.prepareStatement(query);
 
         preparedStatement.setString(1, name);
@@ -68,12 +68,13 @@ public class Database {
         preparedStatement.close();
     }
     public Configuration getConfig(String name) throws SQLException {
-
         Configuration configuration = Configuration.getInstance();
 
-        String query = "SELECT assignmentPath, compilerPath, args,name, expectedOutput FROM config_table WHERE ID ="+name+";";
-        Statement statement = connection.createStatement();
-        ResultSet resultSet = statement.executeQuery(query);
+        String query = "SELECT assignmentPath, compilerPath, args, name, expectedOutput FROM config_table WHERE name = ?";
+        PreparedStatement preparedStatement = connection.prepareStatement(query);
+        preparedStatement.setString(1, name);
+
+        ResultSet resultSet = preparedStatement.executeQuery();
 
         if (resultSet.next()) {
             configuration.assignmentPath = resultSet.getString("assignmentPath");
@@ -84,25 +85,26 @@ public class Database {
         }
 
         resultSet.close();
-        statement.close();
+        preparedStatement.close();
 
         return configuration;
     }
-        public HashMap<String, Configuration> getAllConfigs() throws SQLException {
-        HashMap<String,Configuration> allConfigs = new HashMap<String,Configuration>();
 
-        Configuration configuration = Configuration.getInstance();
+    public HashMap<String, Configuration> getAllConfigs() throws SQLException {
+        HashMap<String, Configuration> allConfigs = new HashMap<>();
 
-        String query = "SELECT compilerPath, args,name, expectedOutput FROM config_table;";
+        String query = "SELECT compilerPath, args, name, expectedOutput FROM config_table;";
         Statement statement = connection.createStatement();
         ResultSet resultSet = statement.executeQuery(query);
 
-        if (resultSet.next()) {
-            configuration.compilerPath = resultSet.getString("compilerPath");
-            configuration.args = resultSet.getString("args");
-            configuration.name = resultSet.getString("name");
-            configuration.expectedOutput = resultSet.getString("expectedOutput");
-            allConfigs.put(configuration.name,new Configuration(configuration.name,"",configuration.compilerPath,configuration.args,configuration.expectedOutput));
+        while (resultSet.next()) {
+            String compilerPath = resultSet.getString("compilerPath");
+            String args = resultSet.getString("args");
+            String name = resultSet.getString("name");
+            String expectedOutput = resultSet.getString("expectedOutput");
+
+            Configuration configuration = new Configuration(name, "", compilerPath, args, expectedOutput);
+            allConfigs.put(name, configuration);
         }
 
         resultSet.close();
@@ -110,6 +112,7 @@ public class Database {
 
         return allConfigs;
     }
+
     public void editConfiguration(Configuration configuration) throws SQLException{
 
 
