@@ -1,25 +1,54 @@
 package ieu.edu.tr.iae;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.InputStreamReader;
 
 public abstract class Compiler {
-
-    protected File workingDirectory;
+    public final File workingDirectory;
 
     public Compiler(File workingDirectory) {
         this.workingDirectory = workingDirectory;
     }
 
-    public abstract Output compile(String filePath, String args) throws Exception;
-
-    protected String consumeStream(InputStream inputStream) throws IOException {
-        StringBuilder result = new StringBuilder();
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                result.append(line).append(System.lineSeparator());
-            }
+    public Output compile(String path, String args) throws Exception {
+        Process process = Runtime.getRuntime().exec(path + " " + args, null, workingDirectory);
+        process.waitFor();
+        BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+        BufferedReader errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()));
+        String line;
+        String output = "";
+        String error = "";
+        while ((line = reader.readLine()) != null) {
+            output += line + "\n";
         }
-        return result.toString();
+        while ((line = errorReader.readLine()) != null) {
+            error += line + "\n";
+        }
+        Output outputObj = new Output(process.exitValue(), error, output);
+        System.out.println(outputObj.getExitCode() +outputObj.getResult() + outputObj.getError());
+        return outputObj;
+    }
+
+    public Output run(String command) throws Exception {
+        Process process = Runtime.getRuntime().exec(command, null, workingDirectory);
+        process.waitFor();
+        BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+        BufferedReader errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()));
+        String line;
+        String output = "";
+        String error = "";
+        while ((line = reader.readLine()) != null) {
+            output += line + "\n";
+        }
+        while ((line = errorReader.readLine()) != null) {
+            error += line + "\n";
+        }
+        Output outputObj = new Output(process.exitValue(), error, output);
+        return outputObj;
+    }
+
+    public File getWorkingDirectory() {
+        return workingDirectory;
     }
 }

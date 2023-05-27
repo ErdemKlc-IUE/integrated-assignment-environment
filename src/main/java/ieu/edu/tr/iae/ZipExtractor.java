@@ -4,8 +4,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -62,10 +60,10 @@ public class ZipExtractor {
                         }
                     }
 
-                    // Compile the file based on the file extension
+                    // Compile and execute the file based on the file extension
                     String fileExtension = getFileExtension(entryFileName);
-                    String compilationOutput = compileFile(entryFile, fileExtension);
-                    return new Submission(zipFile.getName(), compilationOutput,
+                    Output output = compileAndRunFile(entryFile, fileExtension);
+                    return new Submission(zipFile.getName(), output.getResult(),
                             Configuration.getInstance().expectedOutput);
                 }
 
@@ -101,93 +99,57 @@ public class ZipExtractor {
         return "";
     }
 
-    private String compileFile(File file, String fileExtension) throws IOException {
-        String filePath = file.getAbsolutePath();
-        String compilationOutput;
+    private Output compileAndRunFile(File file, String fileExtension) throws IOException {
+        String filePath = file.getPath();
+
+        String executionOutput = "";
 
         switch (fileExtension) {
             case "java":
-                compilationOutput = compileJavaFile(filePath);
+                JavaCompiler javaCompiler = new JavaCompiler(file.getParentFile());
+                System.out.println(file.getParentFile());
+                try {
+                    Output compilationOutput = javaCompiler.compile(filePath, "");
+                    System.out.println(compilationOutput.getResult());
+
+                    executionOutput = compilationOutput.getResult();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
                 break;
             case "py":
-                compilationOutput = runPythonInterpreter(filePath);
+                PythonInterpreter pythonInterpreter = new PythonInterpreter(file.getParentFile());
+                try {
+                    Output executionOutputObj = pythonInterpreter.compile(filePath, "");
+                    executionOutput = executionOutputObj.getResult();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
                 break;
             case "c":
-                compilationOutput = compileCFile(filePath);
+                CCompiler cCompiler = new CCompiler(file.getParentFile());
+                try {
+                    Output compilationOutput = cCompiler.compile(filePath, "");
+                    System.out.println(compilationOutput.getResult());
+                    executionOutput = compilationOutput.getResult();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
                 break;
             case "cpp":
-                compilationOutput = compileCPPFile(filePath);
+                CPPCompiler cppCompiler = new CPPCompiler(file.getParentFile());
+                try {
+                    Output compilationOutput = cppCompiler.compile(filePath, "");
+                    executionOutput = compilationOutput.getResult();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
                 break;
             default:
                 System.out.println("Unsupported file extension: " + fileExtension);
-                compilationOutput = "";
                 break;
         }
 
-        return compilationOutput;
-    }
-
-    private String compileJavaFile(String filePath) throws IOException {
-        String directoryPath = new File(filePath).getParent();
-        JavaCompiler compiler = new JavaCompiler(new File(directoryPath));
-        try {
-            Output compilationOutput = compiler.compile(filePath,Configuration.getInstance().args);
-            System.out.println("----");
-            System.out.println(compilationOutput.getResult());
-            System.out.println("-----");
-
-            return compilationOutput.getResult();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return "";
-        }
-    }
-
-    private String runPythonInterpreter(String filePath) throws IOException {
-        String directoryPath = new File(filePath).getParent();
-        PythonInterpreter interpreter = new PythonInterpreter(new File(directoryPath));
-        try {
-            Output executionOutput = interpreter.compile(filePath,"");
-            System.out.println("----");
-            System.out.println(executionOutput.getResult());
-            System.out.println("-----");
-
-            return executionOutput.getResult();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return "";
-        }
-    }
-
-    private String compileCFile(String filePath) throws IOException {
-        String directoryPath = new File(filePath).getParent();
-        CCompiler compiler = new CCompiler(new File(directoryPath));
-        try {
-            Output compilationOutput = compiler.compile(filePath,"");
-            System.out.println("----");
-            System.out.println(compilationOutput.getResult());
-            System.out.println("-----");
-
-            return compilationOutput.getResult();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return "";
-        }
-    }
-
-    private String compileCPPFile(String filePath) throws IOException {
-        String directoryPath = new File(filePath).getParent();
-        CPPCompiler compiler = new CPPCompiler(new File(directoryPath));
-        try {
-            Output compilationOutput = compiler.compile(filePath,"");
-            System.out.println("----");
-            System.out.println(compilationOutput.getResult());
-            System.out.println("-----");
-
-            return compilationOutput.getResult();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return "";
-        }
+        return new Output(1, executionOutput, "");
     }
 }
