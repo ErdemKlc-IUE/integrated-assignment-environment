@@ -14,4 +14,9 @@ public class CPPCompiler extends Compiler {
         String command = "g++ " + args + " \"" + filePath + "\"";
         return super.compile(command, "");
     }
+
+    public Output run(String executableName) throws Exception {
+        String command = workingDirectory.getAbsolutePath() + File.separator + executableName;
+        return super.run(command);
+    }
 }

@@ -16,8 +16,8 @@ public class CCompiler extends Compiler {
     }
 
     @Override
-    public Output run(String className) throws Exception {
-        String command = "./main";
+    public Output run(String executableName) throws Exception {
+        String command = workingDirectory.getAbsolutePath() + File.separator + executableName;
         return super.run(command);
     }
 }

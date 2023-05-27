@@ -110,7 +110,7 @@ public class ZipExtractor {
                 System.out.println(file.getParentFile());
                 try {
                     Output compilationOutput = javaCompiler.compile(filePath, "");
-                    Output executedOutput = javaCompiler.run("HelloWorld");
+                    Output executedOutput = javaCompiler.run(Configuration.getInstance().args);
 
 
                     System.out.println(executedOutput.getResult());
@@ -123,8 +123,8 @@ public class ZipExtractor {
             case "py":
                 PythonInterpreter pythonInterpreter = new PythonInterpreter(file.getParentFile());
                 try {
-                    Output executionOutputObj = pythonInterpreter.compile(filePath, "");
-                    executionOutput = executionOutputObj.getResult();
+                    Output executionOutputObj = pythonInterpreter.run(Configuration.getInstance().args);
+                    System.out.println(executionOutputObj.getResult());
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -133,8 +133,9 @@ public class ZipExtractor {
                 CCompiler cCompiler = new CCompiler(file.getParentFile());
                 try {
                     Output compilationOutput = cCompiler.compile(filePath, "");
+                    Output executedOutput = cCompiler.run("a.exe");
                     System.out.println(compilationOutput.getResult());
-                    executionOutput = compilationOutput.getResult();
+                    System.out.println(executedOutput.getResult());
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -143,7 +144,9 @@ public class ZipExtractor {
                 CPPCompiler cppCompiler = new CPPCompiler(file.getParentFile());
                 try {
                     Output compilationOutput = cppCompiler.compile(filePath, "");
-                    executionOutput = compilationOutput.getResult();
+                    Output executedOutput = cppCompiler.run("a.exe");
+                    System.out.println(compilationOutput.getResult());
+                    System.out.println(executedOutput.getResult());
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
