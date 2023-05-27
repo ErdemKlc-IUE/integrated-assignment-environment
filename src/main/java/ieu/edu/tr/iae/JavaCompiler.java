@@ -20,6 +20,6 @@ public class JavaCompiler extends Compiler {
 
         int exitCode = process.waitFor();
 
-        return new Output(exitCode, output, error);
+        return new Output(exitCode, error, output);
     }
 }

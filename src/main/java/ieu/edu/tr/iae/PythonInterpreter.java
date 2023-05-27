@@ -25,7 +25,7 @@ public class PythonInterpreter extends Compiler {
 
         int exitCode = process.waitFor();
 
-        return new Output( exitCode,outputResult,errorResult);
+        return new Output( exitCode,errorResult,outputResult);
     }
 
     public String consumeStream(InputStream inputStream) throws IOException {

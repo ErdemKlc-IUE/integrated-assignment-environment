@@ -1,14 +1,14 @@
 package ieu.edu.tr.iae;
 
 public class Output {
-    private String output;
+
     private String result;
     private int exitCode;
     private String error;
 
-    public Output(int exitCode, String output, String error) {
-        this.output = output;
+    public Output(int exitCode, String error,String result) {
 
+        this.result = result;
         this.exitCode = exitCode;
         this.error = error;
     }
@@ -39,11 +39,4 @@ public class Output {
         this.result = result;
     }
 
-    public String getOutput() {
-        return output;
-    }
-
-    public void setOutput(String output) {
-        this.output = output;
-    }
 }

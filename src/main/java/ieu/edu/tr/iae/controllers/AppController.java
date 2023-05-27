@@ -14,6 +14,9 @@ import javafx.stage.Stage;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -225,8 +228,21 @@ public class AppController {
 
 
 
+
         runButton.setOnAction(actionEvent -> {
+
+            String directoryPath = conf.assignmentPath;
+            ZipExtractor zipExtractor = new ZipExtractor();
             try {
+                zipExtractor.extractAndCompileZipFilesInDirectory(directoryPath, treeView);
+
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+
+            /*
+            try {
+
 
                 // Extract zip files in the selected directory
                 ZipExtractor zipExtractor = new ZipExtractor();
@@ -484,6 +500,7 @@ public class AppController {
                 alert.setContentText(e.getMessage());
                 alert.showAndWait();
             }
+            */
         });
 
 //

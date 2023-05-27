@@ -26,7 +26,7 @@ public class CCompiler extends Compiler {
 
         int exitCode = process.waitFor();
 
-        return new Output(exitCode, output, null);
+        return new Output(exitCode,null, output);
     }
 
     private String readProcessOutput(InputStream inputStream) throws IOException {
