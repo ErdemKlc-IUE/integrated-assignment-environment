@@ -31,6 +31,7 @@ public abstract class Compiler {
     }
 
     public Output run(String command) throws Exception {
+        System.out.println("run method");
         Process process = Runtime.getRuntime().exec(command, null, workingDirectory);
         process.waitFor();
         BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
@@ -48,7 +49,4 @@ public abstract class Compiler {
         return outputObj;
     }
 
-    public File getWorkingDirectory() {
-        return workingDirectory;
-    }
 }

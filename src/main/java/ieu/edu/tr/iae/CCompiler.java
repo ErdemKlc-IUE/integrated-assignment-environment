@@ -14,4 +14,10 @@ public class CCompiler extends Compiler {
         String command = "gcc " + args + " \"" + filePath + "\"";
         return super.compile(command, "");
     }
+
+    @Override
+    public Output run(String className) throws Exception {
+        String command = "./main";
+        return super.run(command);
+    }
 }

@@ -110,7 +110,10 @@ public class ZipExtractor {
                 System.out.println(file.getParentFile());
                 try {
                     Output compilationOutput = javaCompiler.compile(filePath, "");
-                    System.out.println(compilationOutput.getResult());
+                    Output executedOutput = javaCompiler.run("HelloWorld");
+
+
+                    System.out.println(executedOutput.getResult());
 
                     executionOutput = compilationOutput.getResult();
                 } catch (Exception e) {
