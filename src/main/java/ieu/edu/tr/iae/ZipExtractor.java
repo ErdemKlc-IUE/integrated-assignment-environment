@@ -30,6 +30,7 @@ public class ZipExtractor {
                 Submission submission = extractAndCompileZipFile(file);
                 if (submission != null) {
                     TreeItem<Submission> submissionItem = new TreeItem<>(submission);
+                    treeView.getStylesheets().add("styles.css");
                     treeView.getRoot().getChildren().add(submissionItem);
                 }
             }
@@ -63,8 +64,23 @@ public class ZipExtractor {
                     // Compile and execute the file based on the file extension
                     String fileExtension = getFileExtension(entryFileName);
                     Output output = compileAndRunFile(entryFile, fileExtension);
-                    return new Submission(zipFile.getName(), output.getResult(),
-                            Configuration.getInstance().expectedOutput);
+                    if(Configuration.getInstance().expectedOutput.trim().equals(output.getResult().trim())){
+
+                        System.out.println("output get result: " + output.getResult());
+                        System.out.println("conf get exxpected"+ Configuration.getInstance().expectedOutput);
+                        return new Submission(zipFile.getName(), output.getResult(),
+                                Configuration.getInstance().expectedOutput,"Correct");
+
+                    }else{
+
+
+                        System.out.println("output get result: " + output.getResult());
+                        System.out.println("conf get exxpected"+ Configuration.getInstance().expectedOutput);
+                        return new Submission(zipFile.getName(), output.getResult(),
+                                Configuration.getInstance().expectedOutput,"False");
+                    }
+
+
                 }
 
                 zipInputStream.closeEntry();
@@ -101,8 +117,8 @@ public class ZipExtractor {
 
     private Output compileAndRunFile(File file, String fileExtension) throws IOException {
         String filePath = file.getPath();
+        String executedOutputResult = null;
 
-        String executionOutput = "";
 
         switch (fileExtension) {
             case "java":
@@ -111,11 +127,12 @@ public class ZipExtractor {
                 try {
                     Output compilationOutput = javaCompiler.compile(filePath, "");
                     Output executedOutput = javaCompiler.run(Configuration.getInstance().args);
+                    executedOutputResult = executedOutput.getResult();
 
 
-                    System.out.println(executedOutput.getResult());
 
-                    executionOutput = compilationOutput.getResult();
+
+
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -124,7 +141,8 @@ public class ZipExtractor {
                 PythonInterpreter pythonInterpreter = new PythonInterpreter(file.getParentFile());
                 try {
                     Output executionOutputObj = pythonInterpreter.run(Configuration.getInstance().args);
-                    System.out.println(executionOutputObj.getResult());
+                    executedOutputResult = executionOutputObj.getResult();
+
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -134,8 +152,9 @@ public class ZipExtractor {
                 try {
                     Output compilationOutput = cCompiler.compile(filePath, "");
                     Output executedOutput = cCompiler.run("a.exe");
-                    System.out.println(compilationOutput.getResult());
-                    System.out.println(executedOutput.getResult());
+
+                    executedOutputResult = executedOutput.getResult();
+
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -145,8 +164,8 @@ public class ZipExtractor {
                 try {
                     Output compilationOutput = cppCompiler.compile(filePath, "");
                     Output executedOutput = cppCompiler.run("a.exe");
-                    System.out.println(compilationOutput.getResult());
-                    System.out.println(executedOutput.getResult());
+
+                    executedOutputResult = executedOutput.getResult();
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -156,6 +175,6 @@ public class ZipExtractor {
                 break;
         }
 
-        return new Output(1, executionOutput, "");
+        return new Output(1, "no error", executedOutputResult);
     }
 }

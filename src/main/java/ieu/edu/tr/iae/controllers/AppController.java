@@ -9,6 +9,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 
@@ -64,6 +65,7 @@ public class AppController {
         System.out.println("-************************************");
         Database database = Database.getInstance();
         database.open();
+
 /*
         Configuration javaConf = new Configuration("JavaConfig",null,"javac","main.java",null);
         Configuration pythonConf = new Configuration("PythonConfig",null,"python3","main.py",null);
@@ -80,7 +82,7 @@ public class AppController {
 
         System.out.println(configsInDatabase.keySet());
 
-        root = new TreeItem<Submission>(new Submission("Submissions","-1","-1"));
+        root = new TreeItem<Submission>(new Submission("Submissions","-1","-1","-1"));
         root.setExpanded(true);
 
         treeView.setRoot(new TreeItem<>());
@@ -104,13 +106,40 @@ public class AppController {
 
 
         treeView.setOnMouseClicked(event -> {
-            if (event.getButton().equals(MouseButton.PRIMARY)) {
+            if (event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2) {
+                TreeItem<Submission> selectedItem = treeView.getSelectionModel().getSelectedItem();
+                if (selectedItem != null && selectedItem != treeView.getRoot()) {
+                    Submission submission = selectedItem.getValue();
+
+                    Dialog<Submission> dialog = new Dialog<>();
+
+                    dialog.setTitle("Submission Details");
+                    dialog.setHeaderText("Submission ID: " + submission.getId());
+
+                    DialogPane dialogPane = dialog.getDialogPane();
+                    dialogPane.getButtonTypes().addAll(ButtonType.OK);
+
+                    VBox vbox = new VBox();
+                    vbox.setSpacing(10);
+
+                    Label idLabel = new Label("ID: " + submission.getId());
+                    Label outputLabel = new Label("Output: " + submission.getOutput());
+                    Label expectedOutputLabel = new Label("Expected Output: " + submission.getExpectedOutput());
+                    Label corectnessLabel = new Label("Corectness: " + submission.getCorectness());
+
+                    vbox.getChildren().addAll(idLabel, outputLabel, expectedOutputLabel,corectnessLabel);
+                    dialogPane.setContent(vbox);
+
+                    dialog.showAndWait();
+                }
+            }
+           /* if (event.getButton().equals(MouseButton.PRIMARY)) {
 
                 Dialog<Configuration> d = new Dialog<>();
                 DialogPane pane = new DialogPane();
                 pane.setMaxHeight(700);
                 pane.setMaxWidth(400);
-                //   pane.getStylesheets().add("style.css");
+                //   pane.getStylesheets().add("styles.css");
                 pane.getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
                 d.setDialogPane(pane);
                 VBox box = new VBox();
@@ -126,8 +155,34 @@ public class AppController {
 
             }
 
-
+*/
         });
+
+        treeView.setCellFactory(tree -> new TreeCell<Submission>() {
+            @Override
+            protected void updateItem(Submission item, boolean empty) {
+                super.updateItem(item, empty);
+
+                if (empty || item == null) {
+                    setText(null);
+                    setGraphic(null);
+                } else {
+                    setText(item.getId());
+
+                    if (item.getCorectness().equals("Correct")) {
+                        setStyle("-fx-background-color: green;");
+                        setTextFill(Color.WHITE);
+                    }else if(item.getCorectness().equals("False")){
+                        setStyle("-fx-background-color: red;");
+                        setTextFill(Color.WHITE);
+                    }else {
+                        setStyle("");
+                        setTextFill(Color.BLACK);
+                    }
+                }
+            }
+        });
+
 
         menuItemHelp.setOnAction((value) -> {
             Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
@@ -177,7 +232,7 @@ public class AppController {
             Button export = new Button("Export");
             ListView <String> confList = new ListView<>();
             confList.getItems().addAll(configList);
-            //pane.getStylesheets().add("style.css");
+            //pane.getStylesheets().add("styles.css");
 
             HBox exportBox = new HBox();
             exportBox.getChildren().addAll(confName,export);
@@ -246,7 +301,7 @@ public class AppController {
 //
         configButton.setOnAction((value) -> {
             DialogPane pane = new DialogPane();
-         //   pane.getStylesheets().add("style.css");
+         //   pane.getStylesheets().add("styles.css");
 
 
             config.setPromptText("Config");

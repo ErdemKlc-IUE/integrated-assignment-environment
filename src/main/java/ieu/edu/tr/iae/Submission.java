@@ -4,11 +4,22 @@ public class Submission {
     private String id;
     private String output;
     private String expectedOutput;
+    private String corectness;
 
-    public Submission(String id, String output, String expectedOutput) {
+    public String getCorectness() {
+        return corectness;
+    }
+
+    public void setCorectness(String corectness) {
+        this.corectness = corectness;
+    }
+
+    public Submission(String id, String output, String expectedOutput, String corectness) {
         this.id = id;
         this.output = output;
         this.expectedOutput = expectedOutput;
+        this.corectness = corectness;
+
     }
 
     public String getId() {
