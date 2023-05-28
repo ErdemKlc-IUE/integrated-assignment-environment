@@ -190,11 +190,29 @@ public class AppController {
             alert.setHeaderText("Click "+ "'Show Details'" +" to see the help information");
             alert.setContentText("Welcome to IAE");
             TextArea area = new TextArea();
-            area.setText("1) Choose or create a configuration\n2) Fill the input fields then press 'OK' and for the assignment path please choose the folder that include project zip files." +
-                    "\n3) Press Run to populate treeview" +
-                    "\n4)For the configuration add part, please fill all the input fields." +
-                    " \n5)For the configuration edit part, the name that is entered into the input field must be the same with the one chosen in the ComboBox." +
-                    "\n6)For the configuration delete part, the selected ComboBox is deleted.");
+            area.setText(
+
+
+                    "How to use the program?"+
+                    "\n"+
+                    "\n First you need to start by choosing the configuration, you can do this with the config button." +
+                    "After clicking the config button, you need to select an assignment path that includes many zip files from the window that opens, " +
+                    "\n1)For the configuration add part, please fill all the input fields." +
+                    " \n2)For the configuration edit part, the name that is entered into the input field must be the same with the one chosen in the ComboBox." +
+                    "\n3)For the configuration delete part, the selected ComboBox is deleted."+
+                    "then you can save the expected output by entering the expected output section."+
+                    " \n\n"+
+                    "\n After you are done with the configuration, you can press the run button and see if the output in the zip file matches your output."+
+                    "\n Zip files will appear in the treeview, the green ones show the correct output, the red ones show the wrong ones." +
+                            " moreover, you can easily see the output of each file by clicking on the treeitems." +
+                            "\n"+
+                    "\n What more can you do?"+
+                    "\n"+
+                    "\n You can import and export configurations by clicking on the configuration option in the bar above."+
+                    "\n To export, you need to write the configuration you want to export in the textfield, then you can press the export button."+
+                    "\n To import, you need to select the txt file with configuration information from your computer."
+
+            );
             area.setWrapText(true);
             area.setEditable(false);
 
